@@ -1,26 +1,3 @@
-**Essa é uma excelente ideia de Engenharia de Software!** 
-
-Permitir que o usuário filtre ou organize suas tarefas por **Urgência (Data Limite)** ou por **Criticidade (Prioridade/XP)** é uma funcionalidade clássica presente em grandes ferramentas de gestão do mercado (como o Jira e o Trello). Ela agrega um valor tremendo ao seu portfólio.
-
-### 🛡️ Engenharia por Trás da Solução:
-Ao alterar a ordem de exibição de uma lista na tela, se usarmos o índice comum (`0, 1, 2...`), o JavaScript pode se confundir e marcar a missão errada como concluída. 
-
-Para resolver isso de forma profissional, eu implementei nesta versão:
-1.  **IDs Únicos Universais (UUID):** Cada missão agora ganha um identificador único de segurança no momento em que é criada.
-2.  **Retrocompatibilidade:** Se você já tinha missões cadastradas no navegador, o sistema as detecta e adiciona um ID único automaticamente para que você **não perca suas tarefas de teste anteriores**.
-3.  **Dropdown de Filtro Cyberpunk:** Adicionei um seletor discreto e brilhante no cabeçalho da sua lista, permitindo alternar instantaneamente entre:
-    *   **Mais Recentes** (Ordem de criação)
-    *   **Maior Prioridade** (Alta \\(\rightarrow\\) Média \\(\rightarrow\\) Baixa)
-    *   **Menor Prioridade** (Baixa \\(\rightarrow\\) Média \\(\rightarrow\\) Alta)
-    *   **Prazo mais Urgente** (Deadlines que estão quase expirando primeiro)
-    *   **Prazo mais Distante** (Deadlines com mais tempo de folga)
-    *   **Status** (Deixa as missões pendentes no topo e as concluídas/falhadas no final)
-
----
-
-### 🚀 Código-Fonte Atualizado (`index.html`) pronto para substituir no seu repositório:
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
