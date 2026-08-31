@@ -36,12 +36,12 @@ O projeto segue uma estrutura modular e limpa de diretórios, separando as docum
 
 ```text
 devquest-tasktracker/
-├── README.md               # Apresentação e documentação do projeto
-├── .gitignore              # Configuração para ignorar arquivos temporários do Python
-├── docs/                   # Pasta para armazenamento de documentos de planejamento
-│   └── planejamento_logico.pdf  # Documentação de Arquitetura de Software (Fase 1)
-└── src/                    # Pasta que armazena os códigos do programa
-    └── main.py             # Script principal da aplicação em Python (Fase 2)
+├── README.md                             # Apresentação e documentação do projeto
+├── .gitignore                            # Configuração para ignorar arquivos temporários do Python
+├── docs/                                 # Pasta para armazenamento de documentos de planejamento
+│   └── planejamento_logico_devquest.pdf  # Documentação de Arquitetura de Software (Fase 1)
+└── src/                                  # Pasta que armazena os códigos do programa
+    └── main.py                           # Script principal da aplicação em Python (Fase 2)
 
 ```
 ## Autoria e Contato
