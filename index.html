@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -222,7 +223,7 @@
             padding: 20px;
             border-radius: 8px;
             margin-top: 15px;
-            display: none; /* Controlado via Botão de Toggle */
+            display: none; 
             flex-direction: column;
             gap: 12px;
             border: 1px solid var(--neon-purple);
@@ -366,6 +367,17 @@
         .priority-media { background: rgba(255, 190, 11, 0.15); color: var(--medium-priority); }
         .priority-alta { background: rgba(255, 0, 110, 0.15); color: var(--high-priority); }
 
+        .badge-type {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            background: rgba(157, 78, 221, 0.15);
+            color: var(--neon-purple);
+            border: 1px solid var(--neon-purple);
+        }
+
         .badge-xp {
             color: var(--neon-cyan);
             font-weight: 600;
@@ -463,12 +475,19 @@
 <div class="container" id="main-panel">
     <div class="header-dashboard">
         <!-- Mostrador dinâmico global no cabeçalho -->
-        <div class="user-welcome" style="font-weight: bold;">
+        <div class="user-welcome" style="font-weight: bold; font-size: 0.95rem;">
             Player: <span id="display-username" style="color: var(--neon-cyan);">Player</span> 
-            | <span id="header-level" style="color: var(--neon-purple);">Nível 1</span> 
+            | <span id="header-level" style="color: var(--neon-purple); text-shadow: 0 0 5px var(--neon-purple);">Nível 1</span> 
             (<span id="xp-total" style="color: var(--neon-cyan);">0 XP</span>)
         </div>
-        <button class="btn-logout" style="background: rgba(255, 0, 110, 0.1); color: var(--neon-pink); border: 1px solid var(--neon-pink); padding: 6px 12px; border-radius: 4px; cursor: pointer;" onclick="fazerLogout()">Sair da Conta</button>
+        
+        <!-- Ferramentas de Backup JSON e Logout -->
+        <div style="display: flex; gap: 8px;">
+            <button onclick="exportarBackup()" style="background: rgba(0, 245, 212, 0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem;" title="Exportar Backup JSON">💾 Exportar</button>
+            <button onclick="document.getElementById('import-file').click()" style="background: rgba(157, 78, 221, 0.1); color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem;" title="Importar Backup JSON">📂 Importar</button>
+            <input type="file" id="import-file" onchange="importarBackup(event)" accept=".json" style="display: none;">
+            <button style="background: rgba(255, 0, 110, 0.1); color: var(--neon-pink); border: 1px solid var(--neon-pink); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem;" onclick="fazerLogout()">Sair</button>
+        </div>
     </div>
 
     <!-- Abas de Navegação -->
@@ -479,15 +498,20 @@
 
     <!-- ABA 1: MISSÕES -->
     <div class="tab-content active" id="content-quests">
-        <!-- Cadastro de Tarefas com Deadline -->
+        <!-- Cadastro de Tarefas -->
         <div class="form-group">
             <input type="text" id="quest-title" placeholder="Digite o título da sua missão (Ex: Refatorar Código)...">
             <div class="form-row">
                 <select id="quest-priority" style="flex: 1;">
-                    <option value="">Selecionar Prioridade</option>
+                    <option value="">Prioridade</option>
                     <option value="Baixa">Baixa (10 XP)</option>
                     <option value="Média">Média (25 XP)</option>
                     <option value="Alta">Alta (50 XP)</option>
+                </select>
+                <select id="quest-type" style="flex: 1;">
+                    <option value="comum">Quest Única (Comum)</option>
+                    <option value="diaria">⚡ Diária (Repetível)</option>
+                    <option value="semanal">📅 Semanal (Repetível)</option>
                 </select>
                 <div style="flex: 1; display: flex; flex-direction: column;">
                     <input type="datetime-local" id="quest-deadline">
@@ -496,7 +520,7 @@
             <button class="btn btn-add" style="margin: 0;" onclick="cadastrarMissao()">Iniciar Quest</button>
         </div>
 
-        <!-- Seção de Lista com Ordenação -->
+        <!-- Ordenação -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #252b41; padding-bottom: 10px; margin-bottom: 15px; margin-top: 15px;">
             <h3 style="margin: 0;">Suas Quests Ativas</h3>
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -533,7 +557,7 @@
                 <div class="level-badge" id="profile-level">Nível 1</div>
             </div>
 
-            <!-- Barra de XP (Sobe a cada 200 XP) -->
+            <!-- Barra de XP -->
             <div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
                     <span>Experiência (XP): <strong id="profile-xp-text" style="color: var(--neon-cyan);">0 / 200 XP</strong></span>
@@ -575,9 +599,9 @@
 <script>
     let currentUser = null;
     let modoCadastro = false; 
-    let editingQuestId = null; // Controla qual missão está sendo editada inline
+    let editingQuestId = null; 
 
-    // Síntese de Áudio Retrô de 8-Bits (Web Audio API)
+    // Síntese de Áudio Retrô
     let audioCtx = null;
 
     function inicializarAudio() {
@@ -656,7 +680,6 @@
         osc.stop(now + 0.65);
     }
 
-    // Efeito Visual de Confetes
     function celebrarConclusao() {
         if (typeof confetti === 'function') {
             confetti({
@@ -668,13 +691,78 @@
         }
     }
 
-    // Criptografia SHA-256 no Client-Side
     async function hashSenha(senha) {
         const msgUint8 = new TextEncoder().encode(senha);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         return hashHex;
+    }
+
+    // EXPORTAR BACKUP JSON (PRODUÇÃO)
+    function exportarBackup() {
+        if (!currentUser) return;
+        const backupData = {
+            username: currentUser,
+            profile: JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {},
+            stats: JSON.parse(localStorage.getItem(`devquest_stats_${currentUser}`)) || {},
+            missoes: JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [],
+            xp: parseInt(localStorage.getItem(`devquest_xp_${currentUser}`)) || 0,
+            exportedAt: new Date().toISOString()
+        };
+
+        const jsonStr = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `devquest_backup_${currentUser}_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // IMPORTAR BACKUP JSON (PRODUÇÃO)
+    function importarBackup(event) {
+        const file = event.target.files;
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.username || !Array.isArray(data.missoes)) {
+                    throw new Error("Formato de backup inválido.");
+                }
+
+                const aceita = confirm(`Deseja importar o backup do usuário '${data.username}'? Isso substituirá as informações locais deste perfil.`);
+                if (!aceita) return;
+
+                currentUser = data.username;
+                sessionStorage.setItem('devquest_session_user', currentUser);
+                
+                // Salva tudo no LocalStorage
+                localStorage.setItem(`devquest_profile_${currentUser}`, JSON.stringify(data.profile));
+                localStorage.setItem(`devquest_stats_${currentUser}`, JSON.stringify(data.stats));
+                localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(data.missoes));
+                localStorage.setItem(`devquest_xp_${currentUser}`, data.xp);
+
+                // Garante que o usuário esteja registrado no banco global de logins
+                let registeredUsers = JSON.parse(localStorage.getItem('devquest_registered_users')) || [];
+                if (!registeredUsers.some(u => u.username.toLowerCase() === currentUser.toLowerCase())) {
+                    registeredUsers.push({ username: currentUser, password: "" });
+                    localStorage.setItem('devquest_registered_users', JSON.stringify(registeredUsers));
+                }
+
+                alert("Backup restaurado e sincronizado com sucesso!");
+                carregarDashboardUsuario();
+            } catch (err) {
+                alert("Erro ao importar backup: " + err.message);
+            }
+        };
+        reader.readAsText(file);
     }
 
     window.onload = function() {
@@ -825,6 +913,41 @@
         document.getElementById('auth-panel').style.display = 'block';
     }
 
+    function verificarResetsRepetiveis(lista) {
+        let alterado = false;
+        const agora = new Date();
+
+        lista.forEach(missao => {
+            if (missao.status === "Concluída" && missao.tipo && missao.tipo !== "comum" && missao.ultimaConclusao) {
+                const dataConclusao = new Date(missao.ultimaConclusao);
+                
+                if (missao.tipo === "diaria") {
+                    if (agora.getDate() !== dataConclusao.getDate() || 
+                        agora.getMonth() !== dataConclusao.getMonth() || 
+                        agora.getFullYear() !== dataConclusao.getFullYear()) {
+                        
+                        missao.status = "Pendente";
+                        delete missao.ultimaConclusao;
+                        alterado = true;
+                    }
+                } else if (missao.tipo === "semanal") {
+                    const diffTempo = Math.abs(agora - dataConclusao);
+                    const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+                    if (diffDias >= 7) {
+                        missao.status = "Pendente";
+                        delete missao.ultimaConclusao;
+                        alterado = true;
+                    }
+                }
+            }
+        });
+
+        if (alterado) {
+            localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
+        }
+        return lista;
+    }
+
     function obterMissoesDoUsuario() {
         let lista = JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [];
         let alterado = false;
@@ -834,11 +957,17 @@
                 missao.id = Date.now() + "_" + Math.random().toString(36).substr(2, 9);
                 alterado = true;
             }
+            if (!missao.tipo) {
+                missao.tipo = "comum";
+                alterado = true;
+            }
         });
 
         if (alterado) {
             localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
         }
+
+        lista = verificarResetsRepetiveis(lista);
         return lista;
     }
 
@@ -899,7 +1028,7 @@
         localStorage.setItem(`devquest_profile_${currentUser}`, JSON.stringify(perfil));
         tocarSomSucesso();
         alert("Perfil atualizado com sucesso!");
-        carapanelToggle(false); // Recolhe a aba automaticamente
+        carapanelToggle(false); 
         renderizarPerfil();
     }
 
@@ -907,10 +1036,12 @@
         inicializarAudio();
         const tituloInput = document.getElementById('quest-title');
         const prioridadeSelect = document.getElementById('quest-priority');
+        const tipoSelect = document.getElementById('quest-type');
         const deadlineInput = document.getElementById('quest-deadline');
 
         const titulo = tituloInput.value.trim();
         const prioridade = prioridadeSelect.value;
+        const tipo = tipoSelect.value;
         const deadlineValue = deadlineInput.value;
 
         if (titulo === "") {
@@ -943,6 +1074,7 @@
             id: Date.now() + "_" + Math.random().toString(36).substr(2, 9),
             titulo: titulo,
             prioridade: prioridade,
+            tipo: tipo,
             xp: xpCalculado,
             status: "Pendente",
             deadline: deadlineValue
@@ -955,13 +1087,13 @@
 
         tituloInput.value = "";
         prioridadeSelect.value = "";
+        tipoSelect.value = "comum";
         deadlineInput.value = "";
 
         tocarSomSucesso();
         renderizarMissoes();
     }
 
-    // SISTEMA INLINE DE EDIÇÃO
     function iniciarEdicao(id) {
         editingQuestId = id;
         renderizarMissoes();
@@ -976,6 +1108,7 @@
         inicializarAudio();
         const novoTitulo = document.getElementById(`edit-title-${id}`).value.trim();
         const novaPrioridade = document.getElementById(`edit-priority-${id}`).value;
+        const novoTipo = document.getElementById(`edit-type-${id}`).value;
         const novaDeadline = document.getElementById(`edit-deadline-${id}`).value;
 
         if (novoTitulo === "" || novaPrioridade === "" || novaDeadline === "") {
@@ -996,6 +1129,7 @@
             let missao = lista[index];
             missao.titulo = novoTitulo;
             missao.prioridade = novaPrioridade;
+            missao.tipo = novoTipo;
             missao.deadline = novaDeadline;
 
             let xpCalculado = 0;
@@ -1011,7 +1145,6 @@
         }
     }
 
-    // SISTEMA DE EXCLUSÃO SEGURA COM RECÁLCULO DE XP
     function excluirMissao(id) {
         inicializarAudio();
         if (confirm("Deseja realmente excluir esta missão? Se concluída ou falhada, seu XP e estatísticas serão recalculados.")) {
@@ -1023,7 +1156,6 @@
             if (index !== -1) {
                 const missao = lista[index];
                 
-                // Trata o estorno de XP e estatísticas
                 if (missao.status === "Concluída") {
                     xpAcumulado -= missao.xp;
                     if (xpAcumulado < 0) xpAcumulado = 0;
@@ -1034,7 +1166,6 @@
                     else if (missao.prioridade === "Média") stats.mediaPrioridadeConcluidas = Math.max(0, stats.mediaPrioridadeConcluidas - 1);
                     else if (missao.prioridade === "Baixa") stats.baixaPrioridadeConcluidas = Math.max(0, stats.baixaPrioridadeConcluidas - 1);
                 } else if (missao.status === "Falhada") {
-                    // Devolve o XP perdido como compensação por remover a tarefa
                     xpAcumulado += missao.xp;
                     stats.totalFalhas = Math.max(0, stats.totalFalhas - 1);
                 }
@@ -1045,7 +1176,7 @@
                 localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
                 salvarEstatisticasUsuario(stats);
 
-                tocarSomFalha(); // Som de remoção
+                tocarSomFalha(); 
                 atualizarHeaderXp();
                 renderizarMissoes();
             }
@@ -1079,6 +1210,7 @@
                 const nivelDepois = Math.floor(novoXp / 200) + 1;
 
                 missao.status = "Concluída";
+                missao.ultimaConclusao = agora.getTime(); 
                 xpAcumulado = novoXp;
 
                 stats.totalCompletas += 1;
@@ -1155,7 +1287,6 @@
         listContainer.innerHTML = "";
 
         const lista = obterMissoesDoUsuario();
-        const xpAcumulado = obterXpDoUsuario();
 
         if (lista.length === 0) {
             listContainer.innerHTML = `<li style="text-align: center; color: #8b8f9e; padding: 20px;">Você não tem missões cadastradas no momento. Comece adicionando uma!</li>`;
@@ -1182,10 +1313,12 @@
         listaOrdenada.forEach((missao) => {
             const isCompleted = missao.status === "Concluída";
             const isFailed = missao.status === "Falhada";
+            const isDaily = missao.tipo === "diaria";
+            const isWeekly = missao.tipo === "semanal";
+
             const li = document.createElement('li');
             li.className = `quest-item ${isCompleted ? 'quest-completed' : ''} ${isFailed ? 'quest-failed' : ''}`;
 
-            // VIEW DE EDIÇÃO INLINE
             if (missao.id === editingQuestId) {
                 li.style.flexDirection = "column";
                 li.style.alignItems = "stretch";
@@ -1202,6 +1335,11 @@
                             <option value="Média" ${missao.prioridade === 'Média' ? 'selected' : ''}>Média (25 XP)</option>
                             <option value="Alta" ${missao.prioridade === 'Alta' ? 'selected' : ''}>Alta (50 XP)</option>
                         </select>
+                        <select id="edit-type-${missao.id}" style="flex: 1;">
+                            <option value="comum" ${missao.tipo === 'comum' ? 'selected' : ''}>Quest Única</option>
+                            <option value="diaria" ${missao.tipo === 'diaria' ? 'selected' : ''}>⚡ Diária</option>
+                            <option value="semanal" ${missao.tipo === 'semanal' ? 'selected' : ''}>📅 Semanal</option>
+                        </select>
                         <input type="datetime-local" id="edit-deadline-${missao.id}" value="${missao.deadline}" style="flex: 1;">
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
@@ -1210,17 +1348,21 @@
                     </div>
                 `;
             } else {
-                // VIEW NORMAL DA MISSÃO
                 const formatadorData = new Date(missao.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                
+                let tipoBadge = "";
+                if (isDaily) tipoBadge = `<span class="badge-type">⚡ Diária</span>`;
+                else if (isWeekly) tipoBadge = `<span class="badge-type">📅 Semanal</span>`;
 
                 li.innerHTML = `
                     <div class="quest-info">
                         <span class="quest-title">${missao.titulo}</span>
                         <div class="quest-meta">
                             <span class="badge-priority priority-${missao.prioridade.toLowerCase()}">${missao.prioridade}</span>
+                            ${tipoBadge}
                             <span class="badge-xp">${isFailed ? '-' : '+'}${missao.xp} XP</span>
                             <span class="quest-deadline">⏱| Limite: ${formatadorData}</span>
-                            ${isCompleted ? '<span class="badge-status-completed">Concluída</span>' : ''}
+                            ${isCompleted ? `<span class="badge-status-completed">${(isDaily||isWeekly) ? 'Concluída Hoje' : 'Concluída'}</span>` : ''}
                             ${isFailed ? '<span class="badge-status-failed">Falhada (Expirada)</span>' : ''}
                         </div>
                     </div>
@@ -1388,7 +1530,7 @@
     function renderizarPerfil() {
         const totalXP = obterXpDoUsuario();
         const lista = obterMissoesDoUsuario();
-        const Concluidas = lista.filter(m => m.status === "Concluída").length;
+        const concluidas = lista.filter(m => m.status === "Concluída").length;
         const stats = obterEstatisticasUsuario();
 
         const perfilSalvo = JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {};
@@ -1407,7 +1549,7 @@
         document.getElementById('profile-total-xp-text').innerText = `Total: ${totalXP} XP`;
         document.getElementById('xp-bar').style.width = `${porcentagemXP}%`;
 
-        const bancoConquistas = gerarBancoDeConquistas(Concluidas, totalXP, stats);
+        const bancoConquistas = gerarBancoDeConquistas(concluidas, totalXP, stats);
         const achievementsList = document.getElementById('achievements-list');
         achievementsList.innerHTML = "";
 
@@ -1435,4 +1577,4 @@
 
 </body>
 </html>
-
+,TargetFile:/workspace/scratch/index_code.txt}
