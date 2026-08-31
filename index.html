@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevQuest - TaskTracker Gamificado</title>
     <style>
-        /* Estilo Dark RPG Futurista (Neon Cyberpunk) */
+        /* Estilo Dark RPG Cyberpunk */
         :root {
             --bg-color: #0d0e15;
             --card-bg: #151824;
@@ -39,7 +39,7 @@
             border: 2px solid var(--neon-purple);
             box-shadow: 0 0 20px rgba(157, 78, 221, 0.2);
             padding: 30px;
-            display: none; /* Controlado via JS */
+            display: none; 
         }
 
         /* Tela de Autenticação */
@@ -224,6 +224,24 @@
             box-shadow: 0 0 10px var(--neon-cyan);
         }
 
+        /* Formulário de Edição de Perfil */
+        .edit-profile-form {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #252b41;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .edit-profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         /* Grid de Conquistas */
         .achievements-grid {
             display: grid;
@@ -261,7 +279,7 @@
         /* Conquista Bloqueada (Cinza) */
         .achievement-card.locked {
             filter: grayscale(1);
-            opacity: 0.35;
+            opacity: 0.2;
         }
 
         /* Conquista Desbloqueada (Colorida e Brilhante) */
@@ -491,10 +509,16 @@
     <!-- ABA 2: PERFIL & CONQUISTAS -->
     <div class="tab-content" id="content-profile">
         <div class="profile-container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h2 id="profile-name" style="margin: 0; color: var(--neon-cyan);">Gabrielle Keiko</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #8b8f9e;">Ciência de Dados & Machine Learning | UniCEUB</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <!-- Perfil com 4 campos obrigatórios e personalizáveis -->
+                    <h2 id="profile-display-name" style="margin: 0; color: var(--neon-cyan);">Jogador</h2>
+                    
+                    <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem;">
+                        <div>🎂 Idade: <span id="profile-display-age" style="color: #fff; font-weight: bold;">Não informada</span></div>
+                        <div>📧 E-mail: <span id="profile-display-email" style="color: #fff;">Não informado</span></div>
+                        <div>💼 Curso / Área de Trabalho: <span id="profile-display-course" style="color: var(--neon-purple); font-weight: bold;">Recruta em Treinamento</span></div>
+                    </div>
                 </div>
                 <div class="level-badge" id="profile-level">Nível 1</div>
             </div>
@@ -510,9 +534,23 @@
                 </div>
             </div>
 
-            <!-- Galeria de Conquistas (+100) -->
-            <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin: 25px 0 0 0; color: var(--neon-cyan); font-size: 1.1rem; text-transform: uppercase;">
-                🏆 Conquistas Desbloqueadas (<span id="achievements-count">0/105</span>)
+            <!-- Formulário Editável (Opcional) -->
+            <div class="edit-profile-form">
+                <span style="font-size: 0.85rem; font-weight: bold; color: var(--neon-cyan); text-transform: uppercase;">📝 Personalizar Dados do Player (Opcional)</span>
+                <div class="edit-profile-grid">
+                    <input type="text" id="edit-fullname" placeholder="Nome Completo">
+                    <input type="text" id="edit-age" placeholder="Idade (Ex: 21 anos)">
+                </div>
+                <div class="edit-profile-grid">
+                    <input type="text" id="edit-email" placeholder="E-mail de Contato">
+                    <input type="text" id="edit-course" placeholder="Curso ou Área de Trabalho">
+                </div>
+                <button class="btn" style="padding: 8px; margin: 0; font-size: 0.85rem;" onclick="salvarInformacoesPerfil()">Atualizar Dados do Perfil</button>
+            </div>
+
+            <!-- Galeria de Conquistas Rebalanceada (+100) -->
+            <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin: 15px 0 0 0; color: var(--neon-cyan); font-size: 1.1rem; text-transform: uppercase;">
+                🏆 Conquistas Desbloqueadas (<span id="achievements-count">0/115</span>)
             </h3>
             <div class="achievements-grid" id="achievements-list">
                 <!-- Geradas dinamicamente via JS -->
@@ -522,11 +560,9 @@
 </div>
 
 <script>
-    // Controle de Sessão e Estado do Sistema
     let currentUser = null;
     let modoCadastro = false; 
 
-    // Inicialização da aplicação
     window.onload = function() {
         const userSalvo = sessionStorage.getItem('devquest_session_user');
         if (userSalvo) {
@@ -534,11 +570,9 @@
             carregarDashboardUsuario();
         }
         
-        // Rodar validador de deadlines a cada 10 segundos
         setInterval(verificarDeadlinesExpiradas, 10000);
     };
 
-    // Alternar entre abas
     function mudarAba(aba) {
         document.getElementById('tab-quests').classList.remove('active');
         document.getElementById('tab-profile').classList.remove('active');
@@ -552,11 +586,11 @@
         } else {
             document.getElementById('tab-profile').classList.add('active');
             document.getElementById('content-profile').classList.add('active');
+            carregarCamposEdicaoPerfil();
             renderizarPerfil();
         }
     }
 
-    // Alternar entre Login e Cadastro
     function alternarModoAuth() {
         modoCadastro = !modoCadastro;
         const authTitle = document.getElementById('auth-title');
@@ -574,7 +608,6 @@
         }
     }
 
-    // Login ou Registro de Usuário
     function processarAutenticacao() {
         const usernameInput = document.getElementById('username').value.trim();
         const passwordInput = document.getElementById('password').value.trim();
@@ -595,6 +628,9 @@
 
             usuariosRegistrados.push({ username: usernameInput, password: passwordInput });
             localStorage.setItem('devquest_registered_users', JSON.stringify(usuariosRegistrados));
+            
+            inicializarEstatisticasNovoUsuario(usernameInput);
+
             alert("Sucesso! Conta criada com êxito. Faça o seu login!");
             alternarModoAuth();
         } else {
@@ -610,11 +646,52 @@
         }
     }
 
+    function inicializarEstatisticasNovoUsuario(user) {
+        const stats = {
+            totalCompletas: 0,
+            totalFalhas: 0,
+            sequenciaAtual: 0,
+            altaPrioridadeConcluidas: 0,
+            mediaPrioridadeConcluidas: 0,
+            baixaPrioridadeConcluidas: 0,
+            clutchConclusoes: 0,
+            superClutchConclusoes: 0 // Menos de 1 minuto restante!
+        };
+        localStorage.setItem(`devquest_stats_${user}`, JSON.stringify(stats));
+    }
+
+    function obterEstatisticasUsuario() {
+        let stats = JSON.parse(localStorage.getItem(`devquest_stats_${currentUser}`));
+        if (!stats) {
+            stats = {
+                totalCompletas: 0,
+                totalFalhas: 0,
+                sequenciaAtual: 0,
+                altaPrioridadeConcluidas: 0,
+                mediaPrioridadeConcluidas: 0,
+                baixaPrioridadeConcluidas: 0,
+                clutchConclusoes: 0,
+                superClutchConclusoes: 0
+            };
+            let lista = obterMissoesDoUsuario();
+            stats.totalCompletas = lista.filter(m => m.status === "Concluída").length;
+            stats.totalFalhas = lista.filter(m => m.status === "Falhada").length;
+            stats.altaPrioridadeConcluidas = lista.filter(m => m.status === "Concluída" && m.prioridade === "Alta").length;
+            stats.mediaPrioridadeConcluidas = lista.filter(m => m.status === "Concluída" && m.prioridade === "Média").length;
+            stats.baixaPrioridadeConcluidas = lista.filter(m => m.status === "Concluída" && m.prioridade === "Baixa").length;
+            localStorage.setItem(`devquest_stats_${currentUser}`, JSON.stringify(stats));
+        }
+        return stats;
+    }
+
+    function salvarEstatisticasUsuario(stats) {
+        localStorage.setItem(`devquest_stats_${currentUser}`, JSON.stringify(stats));
+    }
+
     function carregarDashboardUsuario() {
         document.getElementById('auth-panel').style.display = 'none';
         document.getElementById('main-panel').style.display = 'block';
         document.getElementById('display-username').innerText = currentUser;
-        document.getElementById('profile-name').innerText = currentUser;
 
         document.getElementById('username').value = "";
         document.getElementById('password').value = "";
@@ -638,7 +715,32 @@
         return parseInt(localStorage.getItem(`devquest_xp_${currentUser}`)) || 0;
     }
 
-    // Algoritmo de Cadastro de Missões com Deadline
+    function carregarCamposEdicaoPerfil() {
+        const perfilSalvo = JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {};
+        document.getElementById('edit-fullname').value = perfilSalvo.fullname || "";
+        document.getElementById('edit-age').value = perfilSalvo.age || "";
+        document.getElementById('edit-email').value = perfilSalvo.email || "";
+        document.getElementById('edit-course').value = perfilSalvo.course || "";
+    }
+
+    function salvarInformacoesPerfil() {
+        const fullname = document.getElementById('edit-fullname').value.trim();
+        const age = document.getElementById('edit-age').value.trim();
+        const email = document.getElementById('edit-email').value.trim();
+        const course = document.getElementById('edit-course').value.trim();
+
+        const perfil = {
+            fullname: fullname,
+            age: age,
+            email: email,
+            course: course
+        };
+
+        localStorage.setItem(`devquest_profile_${currentUser}`, JSON.stringify(perfil));
+        alert("Perfil atualizado com sucesso!");
+        renderizarPerfil();
+    }
+
     function cadastrarMissao() {
         const tituloInput = document.getElementById('quest-title');
         const prioridadeSelect = document.getElementById('quest-priority');
@@ -659,7 +761,7 @@
         }
 
         if (deadlineValue === "") {
-            alert("Erro: É obrigatório definir uma data limite para a missão.");
+            alert("Erro: É obrigatório definir um prazo de expiração.");
             return;
         }
 
@@ -694,29 +796,53 @@
         renderizarMissoes();
     }
 
-    // Concluir Quest e Soma de XP
     function concluirMissao(index) {
         let lista = obterMissoesDoUsuario();
         let xpAcumulado = obterXpDoUsuario();
+        let stats = obterEstatisticasUsuario();
         const missao = lista[index];
 
         if (missao.status === "Pendente") {
+            const prazo = new Date(missao.deadline);
+            const agora = new Date();
+            const diferencaMinutos = (prazo - agora) / (1000 * 60);
+
+            // Registro de estatísticas Clutch e Super Clutch (Desafios do Tempo)
+            if (diferencaMinutos > 0 && diferencaMinutos <= 5) {
+                stats.clutchConclusoes += 1;
+                if (diferencaMinutos <= 1) {
+                    stats.superClutchConclusoes += 1;
+                }
+            }
+
             missao.status = "Concluída";
             xpAcumulado += missao.xp;
 
+            stats.totalCompletas += 1;
+            stats.sequenciaAtual += 1;
+
+            if (missao.prioridade === "Alta") {
+                stats.altaPrioridadeConcluidas += 1;
+            } else if (missao.prioridade === "Média") {
+                stats.mediaPrioridadeConcluidas += 1;
+            } else if (missao.prioridade === "Baixa") {
+                stats.baixaPrioridadeConcluidas += 1;
+            }
+
             localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
             localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
+            salvarEstatisticasUsuario(stats);
 
             renderizarMissoes();
         }
     }
 
-    // Verificador de Deadlines Expiradas (Punição se falhar)
     function verificarDeadlinesExpiradas() {
         if (!currentUser) return;
 
         let lista = obterMissoesDoUsuario();
         let xpAcumulado = obterXpDoUsuario();
+        let stats = obterEstatisticasUsuario();
         let alterado = false;
 
         const agora = new Date();
@@ -727,10 +853,12 @@
                 if (agora > prazo) {
                     missao.status = "Falhada";
                     
-                    // Perda do XP correspondente se falhar
                     xpAcumulado -= missao.xp;
                     if (xpAcumulado < 0) xpAcumulado = 0; 
                     
+                    stats.totalFalhas += 1;
+                    stats.sequenciaAtual = 0; // Reseta sequência ativa
+
                     alterado = true;
                     alert(`⚠️ Missão Falhada! Você estourou o prazo limite de "${missao.titulo}" e perdeu ${missao.xp} XP!`);
                 }
@@ -740,11 +868,11 @@
         if (alterado) {
             localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
             localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
+            salvarEstatisticasUsuario(stats);
             renderizarMissoes();
         }
     }
 
-    // Renderização da Lista de Missões
     function renderizarMissoes() {
         const listContainer = document.getElementById('quest-list');
         listContainer.innerHTML = "";
@@ -786,76 +914,144 @@
         document.getElementById('xp-total').innerText = `${xpAcumulado} XP`;
     }
 
-    // GERADOR DINÂMICO DE +100 CONQUISTAS
-    function gerarBancoDeConquistas(missoesConcluidas, totalXP) {
+    // GERADOR DE 115 CONQUISTAS (REBALANCEADO E COMPLEXO)
+    function gerarBancoDeConquistas(missoesConcluidas, totalXP, stats) {
         let conquistas = [];
 
-        // 1. Conquistas de Missões (Complecionista) - 50 Níveis
+        // 1. Conquistas de Missões (Desbravador) - 50 Insígnias
+        // Rebalanceamento: saltos de 10 em 10 tarefas (Impede desbloqueios fáceis)
         for (let i = 1; i <= 50; i++) {
+            const reqMissoes = i * 10;
             conquistas.push({
                 id: `quest-${i}`,
                 nome: `Desbravador ${conversorRomano(i)}`,
-                descricao: `Conclua ${i} missão(ões) de forma bem-sucedida.`,
+                descricao: `Conclua com sucesso um total acumulado de ${reqMissoes} missões.`,
                 icone: i % 2 === 0 ? "🛡️" : "⚔️",
-                desbloqueado: missoesConcluidas >= i
+                desbloqueado: missoesConcluidas >= reqMissoes
             });
         }
 
-        // 2. Conquistas de XP acumulado (Lenda do XP) - 50 Níveis (escala de 50 XP)
+        // 2. Conquistas de XP (Lenda do XP) - 50 Insígnias
+        // Rebalanceamento: saltos de 1000 em 1000 XP
         for (let i = 1; i <= 50; i++) {
-            const xpRequisito = i * 50;
+            const xpRequisito = i * 1000;
             conquistas.push({
                 id: `xp-${i}`,
                 nome: `Lenda do XP ${conversorRomano(i)}`,
-                descricao: `Acumule um total de ${xpRequisito} pontos de experiência.`,
+                descricao: `Acumule um total de ${xpRequisito} pontos de experiência em sua carreira.`,
                 icone: i % 2 === 0 ? "🔮" : "🧪",
                 desbloqueado: totalXP >= xpRequisito
             });
         }
 
-        // 3. Conquistas Extras/Secretas (5 Conquistas)
-        conquistas.push({
-            id: "lvl-5",
-            nome: "Soberana dos Dados",
-            descricao: "Alcance o Nível 5 de Experiência.",
-            icone: "👑",
-            desbloqueado: Math.floor(totalXP / 200) + 1 >= 5 // ATUALIZADO: nível calculado de 200 em 200 XP
-        });
-        conquistas.push({
-            id: "alta-prioridade",
-            nome: "Arquiteta de Soluções",
-            descricao: "Tenha pelo menos uma tarefa de Prioridade Alta concluída.",
-            icone: "🧠",
-            desbloqueado: verificarQuestAltaConcluida()
-        });
+        // 3. Desafios Especiais e Conquistas Complexas - 15 Insígnias de Elite
         conquistas.push({
             id: "safe-coder",
             nome: "Escudo do Git",
-            descricao: "Configure sua conta e mantenha segurança máxima.",
+            descricao: "Configuração técnica inicial de segurança do repositório concluída.",
             icone: "💾",
             desbloqueado: true
         });
         conquistas.push({
-            id: "first-step",
+            id: "primeira-conquista",
             nome: "Primeiro Passo",
-            descricao: "Conclua a sua primeira missão ativa no DevQuest.",
-            icone: "⚡",
+            descricao: "Conclua sua primeira missão de qualquer dificuldade.",
+            icone: "🧭",
             desbloqueado: missoesConcluidas >= 1
         });
         conquistas.push({
-            id: "speedrunner",
-            nome: "Velocista Dev",
-            descricao: "Acumule mais de 500 XP totais.",
-            icone: "🚀",
-            desbloqueado: totalXP >= 500
+            id: "inabalavel",
+            nome: "Inabalável",
+            descricao: "Mantenha uma sequência de 10 missões completadas seguidas sem nenhuma falha.",
+            icone: "🛡️",
+            desbloqueado: stats.sequenciaAtual >= 10
+        });
+        conquistas.push({
+            id: "mestre-tempo",
+            nome: "Mestre do Tempo",
+            descricao: "Conclua uma missão restando menos de 1 minuto para o prazo limite expirar!",
+            icone: "⏱️",
+            desbloqueado: stats.superClutchConclusoes >= 1
+        });
+        conquistas.push({
+            id: "especialista-implacavel",
+            nome: "Especialista Implacável",
+            descricao: "Conclua com sucesso 15 missões de prioridade 'Média' e 15 de prioridade 'Alta'.",
+            icone: "🧠",
+            desbloqueado: (stats.mediaPrioridadeConcluidas >= 15 && stats.altaPrioridadeConcluidas >= 15)
+        });
+        conquistas.push({
+            id: "fenix-dados",
+            nome: "Fênix de Dados",
+            descricao: "Mostre resiliência: conclua 5 tarefas com sucesso após ter falhado em pelo menos 3.",
+            icone: "🔥",
+            desbloqueado: (stats.totalFalhas >= 3 && stats.totalCompletas >= 5)
+        });
+        conquistas.push({
+            id: "complecionista-total",
+            nome: "Mestra das Vertentes",
+            descricao: "Complete exatamente 10 missões de cada nível (10 Baixas, 10 Médias e 10 Altas).",
+            icone: "👑",
+            desbloqueado: (stats.altaPrioridadeConcluidas >= 10 && stats.mediaPrioridadeConcluidas >= 10 && stats.baixaPrioridadeConcluidas >= 10)
+        });
+        conquistas.push({
+            id: "perfeccionista",
+            nome: "Perfeccionista Absoluto",
+            descricao: "Conclua pelo menos 30 missões mantendo taxa de falha igual a 0.",
+            icone: "✨",
+            desbloqueado: (stats.totalCompletas >= 30 && stats.totalFalhas === 0)
+        });
+        conquistas.push({
+            id: "dev-senior",
+            nome: "Dev Sênior",
+            descricao: "Alcance o Nível 10 de Experiência (Exige acumular 1800+ XP).",
+            icone: "💻",
+            desbloqueado: (Math.floor(totalXP / 200) + 1 >= 10)
+        });
+        conquistas.push({
+            id: "espadachim-elite",
+            nome: "Lâmina de Dados",
+            descricao: "Complete 20 missões de prioridade Alta.",
+            icone: "⚔️",
+            desbloqueado: stats.altaPrioridadeConcluidas >= 20
+        });
+        conquistas.push({
+            id: "guardiã-tempo",
+            nome: "Guardiã do Tempo",
+            descricao: "Conclua com sucesso 10 missões sob pressão (com menos de 5 minutos restantes).",
+            icone: "⏳",
+            desbloqueado: stats.clutchConclusoes >= 10
+        });
+        conquistas.push({
+            id: "maratonista",
+            nome: "Maratonista Dev",
+            descricao: "Complete 15 missões no total.",
+            icone: "🏃‍♂️",
+            desbloqueado: missoesConcluidas >= 15
+        });
+        conquistas.push({
+            id: "mestre-xp",
+            nome: "Soberana do XP",
+            descricao: "Consiga acumular o montante total de 10.000 XP.",
+            icone: "🔮",
+            desbloqueado: totalXP >= 10000
+        });
+        conquistas.push({
+            id: "resiliencia",
+            nome: "Escudo de Platina",
+            descricao: "Conclua 50 tarefas no total.",
+            icone: "🎖️",
+            desbloqueado: missoesConcluidas >= 50
+        });
+        conquistas.push({
+            id: "lenda-viva",
+            nome: "Avatar do DevQuest",
+            descricao: "Conclua 100 tarefas no total.",
+            icone: "🌌",
+            desbloqueado: missoesConcluidas >= 100
         });
 
         return conquistas;
-    }
-
-    function verificarQuestAltaConcluida() {
-        const lista = obterMissoesDoUsuario();
-        return lista.some(m => m.prioridade === "Alta" && m.status === "Concluída");
     }
 
     function conversorRomano(num) {
@@ -870,25 +1066,33 @@
         return roman;
     }
 
-    // Renderização do Perfil e das Conquistas
     function renderizarPerfil() {
         const totalXP = obterXpDoUsuario();
         const lista = obterMissoesDoUsuario();
         const concluídas = lista.filter(m => m.status === "Concluída").length;
+        const stats = obterEstatisticasUsuario();
 
-        // Cálculo de Nível (ATUALIZADO: 200 XP por nível)
+        // Carrega dados editados do LocalStorage
+        const perfilSalvo = JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {};
+        
+        // Renderização dos 4 campos principais do perfil na tela
+        document.getElementById('profile-display-name').innerText = perfilSalvo.fullname || currentUser;
+        document.getElementById('profile-display-age').innerText = perfilSalvo.age || "Não informada";
+        document.getElementById('profile-display-email').innerText = perfilSalvo.email || "Não informado";
+        document.getElementById('profile-display-course').innerText = perfilSalvo.course || "Recruta em Treinamento";
+
+        // Cálculo de Nível (200 XP por nível)
         const nivelAtual = Math.floor(totalXP / 200) + 1;
         const xpNoNivelAtual = totalXP % 200;
         const porcentagemXP = (xpNoNivelAtual / 200) * 100; // Porcentagem real da barra
 
-        // Atualizar textos e dados do perfil
         document.getElementById('profile-level').innerText = `Nível ${nivelAtual}`;
-        document.getElementById('profile-xp-text').innerText = `${xpNoNivelAtual} / 200 XP`; // ATUALIZADO
+        document.getElementById('profile-xp-text').innerText = `${xpNoNivelAtual} / 200 XP`;
         document.getElementById('profile-total-xp-text').innerText = `Total: ${totalXP} XP`;
         document.getElementById('xp-bar').style.width = `${porcentagemXP}%`;
 
         // Renderizar Galeria de Conquistas (+100)
-        const bancoConquistas = gerarBancoDeConquistas(concluídas, totalXP);
+        const bancoConquistas = gerarBancoDeConquistas(concluídas, totalXP, stats);
         const achievementsList = document.getElementById('achievements-list');
         achievementsList.innerHTML = "";
 
@@ -897,14 +1101,14 @@
         bancoConquistas.forEach(conq => {
             const card = document.createElement('div');
             card.className = `achievement-card ${conq.desbloqueado ? 'unlocked' : 'locked'}`;
-            card.title = conq.descricao;
+            card.title = `${conq.nome}: ${conq.descricao}`;
 
             if (conq.desbloqueado) desbloqueadasContador++;
 
             card.innerHTML = `
                 <div class="achievement-icon">${conq.icone}</div>
                 <div class="achievement-name">${conq.nome}</div>
-                <div style="font-size: 0.6rem; color: #8b8f9e;">${conq.desbloqueado ? 'Desbloqueada!' : 'Bloqueada'}</div>
+                <div style="font-size: 0.6rem; color: #8b8f9e;">${conq.desbloqueado ? 'Desbloqueado' : 'Bloqueado'}</div>
             `;
 
             achievementsList.appendChild(card);
