@@ -1388,7 +1388,7 @@
     function renderizarPerfil() {
         const totalXP = obterXpDoUsuario();
         const lista = obterMissoesDoUsuario();
-        const concluídas = lista.filter(m => m.status === "Concluída").length;
+        const Concluidas = lista.filter(m => m.status === "Concluída").length;
         const stats = obterEstatisticasUsuario();
 
         const perfilSalvo = JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {};
@@ -1407,7 +1407,7 @@
         document.getElementById('profile-total-xp-text').innerText = `Total: ${totalXP} XP`;
         document.getElementById('xp-bar').style.width = `${porcentagemXP}%`;
 
-        const bancoConquistas = gerarBancoDeConquistas(concluidas, totalXP, stats);
+        const bancoConquistas = gerarBancoDeConquistas(Concluidas, totalXP, stats);
         const achievementsList = document.getElementById('achievements-list');
         achievementsList.innerHTML = "";
 
