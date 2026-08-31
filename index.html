@@ -1121,6 +1121,7 @@
 
         tocarSomSucesso();
         renderizarMissoes();
+        sincronizarComANuvem();
     }
 
     function iniciarEdicao(id) {
@@ -1208,6 +1209,7 @@
                 tocarSomFalha(); 
                 atualizarHeaderXp();
                 renderizarMissoes();
+                sincronizarComANuvem();
             }
         }
     }
@@ -1268,6 +1270,7 @@
                 }
 
                 renderizarMissoes();
+                sincronizarComANuvem();
             }
         }
     }
