@@ -600,7 +600,37 @@
     let modoCadastro = false; 
     let editingQuestId = null; 
 
-    // Síntese de Áudio Retrô
+    // 🌐 CONEXÃO COM A SUA API DO RENDER (Adicione estas linhas)
+    // Substitua o link abaixo pela URL real que o Render gerou para você!
+    const API_URL = "https://devquest-api.onrender.com"; 
+
+    async function sincronizarComANuvem() {
+        if (!currentUser) return;
+        
+        const payload = {
+            username: currentUser,
+            profile: JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {},
+            stats: JSON.parse(localStorage.getItem(`devquest_stats_${currentUser}`)) || {},
+            missoes: JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [],
+            xp: parseInt(localStorage.getItem(`devquest_xp_${currentUser}`)) || 0
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/api/backup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            const resultado = await response.json();
+            console.log("Sincronização Segura ativa:", resultado.mensagem);
+        } catch (error) {
+            console.error("Falha ao salvar dados na nuvem com segurança:", error);
+        }
+    }
+
+    // Síntese de Áudio Retrô de 8-Bits (Web Audio API)
     let audioCtx = null;
 
     function inicializarAudio() {
