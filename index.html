@@ -1,3 +1,26 @@
+**Essa é uma excelente ideia de Engenharia de Software!** 
+
+Permitir que o usuário filtre ou organize suas tarefas por **Urgência (Data Limite)** ou por **Criticidade (Prioridade/XP)** é uma funcionalidade clássica presente em grandes ferramentas de gestão do mercado (como o Jira e o Trello). Ela agrega um valor tremendo ao seu portfólio.
+
+### 🛡️ Engenharia por Trás da Solução:
+Ao alterar a ordem de exibição de uma lista na tela, se usarmos o índice comum (`0, 1, 2...`), o JavaScript pode se confundir e marcar a missão errada como concluída. 
+
+Para resolver isso de forma profissional, eu implementei nesta versão:
+1.  **IDs Únicos Universais (UUID):** Cada missão agora ganha um identificador único de segurança no momento em que é criada.
+2.  **Retrocompatibilidade:** Se você já tinha missões cadastradas no navegador, o sistema as detecta e adiciona um ID único automaticamente para que você **não perca suas tarefas de teste anteriores**.
+3.  **Dropdown de Filtro Cyberpunk:** Adicionei um seletor discreto e brilhante no cabeçalho da sua lista, permitindo alternar instantaneamente entre:
+    *   **Mais Recentes** (Ordem de criação)
+    *   **Maior Prioridade** (Alta \\(\rightarrow\\) Média \\(\rightarrow\\) Baixa)
+    *   **Menor Prioridade** (Baixa \\(\rightarrow\\) Média \\(\rightarrow\\) Alta)
+    *   **Prazo mais Urgente** (Deadlines que estão quase expirando primeiro)
+    *   **Prazo mais Distante** (Deadlines com mais tempo de folga)
+    *   **Status** (Deixa as missões pendentes no topo e as concluídas/falhadas no final)
+
+---
+
+### 🚀 Código-Fonte Atualizado (`index.html`) pronto para substituir no seu repositório:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -282,7 +305,7 @@
             opacity: 0.2;
         }
 
-        /* Conquista Desbloqueada (Colorida e Brilhante) */
+        /* Conquista Desbloqueada (Colorida) */
         .achievement-card.unlocked {
             filter: none;
             opacity: 1;
@@ -500,7 +523,22 @@
             <button class="btn btn-add" style="margin: 0;" onclick="cadastrarMissao()">Iniciar Quest</button>
         </div>
 
-        <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin-bottom: 15px;">Suas Quests Ativas</h3>
+        <!-- Seção Dinâmica de Lista com o NOVO seletor de Ordenação -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #252b41; padding-bottom: 10px; margin-bottom: 15px; margin-top: 15px;">
+            <h3 style="margin: 0;">Suas Quests Ativas</h3>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="sort-quests" style="font-size: 0.8rem; color: #8b8f9e; text-transform: uppercase; font-weight: bold;">Ordenar por:</label>
+                <select id="sort-quests" onchange="renderizarMissoes()" style="width: auto; padding: 6px 12px; font-size: 0.85rem; background: #1c2030; border: 1px solid #252b41; border-radius: 4px; color: var(--text-color); cursor: pointer;">
+                    <option value="recentes">Mais Recentes (Padrão)</option>
+                    <option value="prioridade-dec">Maior Prioridade ⚔️</option>
+                    <option value="prioridade-asc">Menor Prioridade 🛡️</option>
+                    <option value="deadline-urgente">Prazo mais Urgente ⏱️</option>
+                    <option value="deadline-distante">Prazo mais Distante ⏳</option>
+                    <option value="status">Status (Pendentes primeiro) 🔄</option>
+                </select>
+            </div>
+        </div>
+
         <ul class="quest-list" id="quest-list">
             <!-- Inseridas dinamicamente via JS -->
         </ul>
@@ -511,7 +549,6 @@
         <div class="profile-container">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="flex: 1;">
-                    <!-- Perfil com 4 campos obrigatórios e personalizáveis -->
                     <h2 id="profile-display-name" style="margin: 0; color: var(--neon-cyan);">Jogador</h2>
                     
                     <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem;">
@@ -534,7 +571,7 @@
                 </div>
             </div>
 
-            <!-- Formulário Editável (Opcional) -->
+            <!-- Formulário Editável -->
             <div class="edit-profile-form">
                 <span style="font-size: 0.85rem; font-weight: bold; color: var(--neon-cyan); text-transform: uppercase;">📝 Personalizar Dados do Player (Opcional)</span>
                 <div class="edit-profile-grid">
@@ -655,7 +692,7 @@
             mediaPrioridadeConcluidas: 0,
             baixaPrioridadeConcluidas: 0,
             clutchConclusoes: 0,
-            superClutchConclusoes: 0 // Menos de 1 minuto restante!
+            superClutchConclusoes: 0
         };
         localStorage.setItem(`devquest_stats_${user}`, JSON.stringify(stats));
     }
@@ -707,8 +744,23 @@
         document.getElementById('auth-panel').style.display = 'block';
     }
 
+    // Busca de missões com compatibilidade de IDs UUID em tarefas antigas
     function obterMissoesDoUsuario() {
-        return JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [];
+        let lista = JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [];
+        let alterado = false;
+        
+        lista.forEach(missao => {
+            if (!missao.id) {
+                // Gera ID para compatibilidade retroativa de tarefas existentes
+                missao.id = Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+                alterado = true;
+            }
+        });
+
+        if (alterado) {
+            localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
+        }
+        return lista;
     }
 
     function obterXpDoUsuario() {
@@ -737,10 +789,11 @@
         };
 
         localStorage.setItem(`devquest_profile_${currentUser}`, JSON.stringify(perfil));
-        alert("Perfil atualizado com sucesso!");
+        alert("Perfil updated com sucesso!");
         renderizarPerfil();
     }
 
+    // Cadastro de missões com ID Universal
     function cadastrarMissao() {
         const tituloInput = document.getElementById('quest-title');
         const prioridadeSelect = document.getElementById('quest-priority');
@@ -777,6 +830,7 @@
         else if (prioridade === "Alta") xpCalculado = 50;
 
         const novaMissao = {
+            id: Date.now() + "_" + Math.random().toString(36).substr(2, 9), // ID único universal
             titulo: titulo,
             prioridade: prioridade,
             xp: xpCalculado,
@@ -796,44 +850,48 @@
         renderizarMissoes();
     }
 
-    function concluirMissao(index) {
+    // Conclusão de missões com busca por ID Único
+    function concluirMissao(id) {
         let lista = obterMissoesDoUsuario();
         let xpAcumulado = obterXpDoUsuario();
         let stats = obterEstatisticasUsuario();
-        const missao = lista[index];
+        
+        const index = lista.findIndex(m => m.id === id);
 
-        if (missao.status === "Pendente") {
-            const prazo = new Date(missao.deadline);
-            const agora = new Date();
-            const diferencaMinutos = (prazo - agora) / (1000 * 60);
+        if (index !== -1) {
+            const missao = lista[index];
+            if (missao.status === "Pendente") {
+                const prazo = new Date(missao.deadline);
+                const agora = new Date();
+                const diferencaMinutos = (prazo - agora) / (1000 * 60);
 
-            // Registro de estatísticas Clutch e Super Clutch (Desafios do Tempo)
-            if (diferencaMinutos > 0 && diferencaMinutos <= 5) {
-                stats.clutchConclusoes += 1;
-                if (diferencaMinutos <= 1) {
-                    stats.superClutchConclusoes += 1;
+                if (diferencaMinutos > 0 && diferencaMinutos <= 5) {
+                    stats.clutchConclusoes += 1;
+                    if (diferencaMinutos <= 1) {
+                        stats.superClutchConclusoes += 1;
+                    }
                 }
+
+                missao.status = "Concluída";
+                xpAcumulado += missao.xp;
+
+                stats.totalCompletas += 1;
+                stats.sequenciaAtual += 1;
+
+                if (missao.prioridade === "Alta") {
+                    stats.altaPrioridadeConcluidas += 1;
+                } else if (missao.prioridade === "Média") {
+                    stats.mediaPrioridadeConcluidas += 1;
+                } else if (missao.prioridade === "Baixa") {
+                    stats.baixaPrioridadeConcluidas += 1;
+                }
+
+                localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
+                localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
+                salvarEstatisticasUsuario(stats);
+
+                renderizarMissoes();
             }
-
-            missao.status = "Concluída";
-            xpAcumulado += missao.xp;
-
-            stats.totalCompletas += 1;
-            stats.sequenciaAtual += 1;
-
-            if (missao.prioridade === "Alta") {
-                stats.altaPrioridadeConcluidas += 1;
-            } else if (missao.prioridade === "Média") {
-                stats.mediaPrioridadeConcluidas += 1;
-            } else if (missao.prioridade === "Baixa") {
-                stats.baixaPrioridadeConcluidas += 1;
-            }
-
-            localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
-            localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
-            salvarEstatisticasUsuario(stats);
-
-            renderizarMissoes();
         }
     }
 
@@ -857,7 +915,7 @@
                     if (xpAcumulado < 0) xpAcumulado = 0; 
                     
                     stats.totalFalhas += 1;
-                    stats.sequenciaAtual = 0; // Reseta sequência ativa
+                    stats.sequenciaAtual = 0; 
 
                     alterado = true;
                     alert(`⚠️ Missão Falhada! Você estourou o prazo limite de "${missao.titulo}" e perdeu ${missao.xp} XP!`);
@@ -873,6 +931,7 @@
         }
     }
 
+    // Renderização com ALGORITMO DE ORDENAÇÃO DINÂMICO
     function renderizarMissoes() {
         const listContainer = document.getElementById('quest-list');
         listContainer.innerHTML = "";
@@ -886,7 +945,29 @@
             return;
         }
 
-        lista.forEach((missao, index) => {
+        // Lê o seletor de ordenação da tela
+        const criterio = document.getElementById('sort-quests').value;
+        
+        // Faz uma cópia da lista original para não embaralhar os dados salvos
+        let listaOrdenada = [...lista];
+
+        const prioridadePeso = { "Alta": 3, "Média": 2, "Baixa": 1 };
+
+        // Aplicação do Algoritmo de Ordenação
+        if (criterio === "prioridade-dec") {
+            listaOrdenada.sort((a, b) => prioridadePeso[b.prioridade] - prioridadePeso[a.prioridade]);
+        } else if (criterio === "prioridade-asc") {
+            listaOrdenada.sort((a, b) => prioridadePeso[a.prioridade] - prioridadePeso[b.prioridade]);
+        } else if (criterio === "deadline-urgente") {
+            listaOrdenada.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        } else if (criterio === "deadline-distante") {
+            listaOrdenada.sort((a, b) => new Date(b.deadline) - new Date(a.deadline));
+        } else if (criterio === "status") {
+            const statusPeso = { "Pendente": 1, "Concluída": 2, "Falhada": 3 };
+            listaOrdenada.sort((a, b) => statusPeso[a.status] - statusPeso[b.status]);
+        }
+
+        listaOrdenada.forEach((missao) => {
             const isCompleted = missao.status === "Concluída";
             const isFailed = missao.status === "Falhada";
             const li = document.createElement('li');
@@ -905,7 +986,7 @@
                         ${isFailed ? '<span class="badge-status-failed">Falhada (Expirada)</span>' : ''}
                     </div>
                 </div>
-                ${(!isCompleted && !isFailed) ? `<button class="btn-complete" onclick="concluirMissao(${index})">Concluir</button>` : '<span></span>'}
+                ${(!isCompleted && !isFailed) ? `<button class="btn-complete" onclick="concluirMissao('${missao.id}')">Concluir</button>` : '<span></span>'}
             `;
 
             listContainer.appendChild(li);
@@ -914,12 +995,10 @@
         document.getElementById('xp-total').innerText = `${xpAcumulado} XP`;
     }
 
-    // GERADOR DE 115 CONQUISTAS (REBALANCEADO E COMPLEXO)
+    // GERADOR DE 115 CONQUISTAS
     function gerarBancoDeConquistas(missoesConcluidas, totalXP, stats) {
         let conquistas = [];
 
-        // 1. Conquistas de Missões (Desbravador) - 50 Insígnias
-        // Rebalanceamento: saltos de 10 em 10 tarefas (Impede desbloqueios fáceis)
         for (let i = 1; i <= 50; i++) {
             const reqMissoes = i * 10;
             conquistas.push({
@@ -931,8 +1010,6 @@
             });
         }
 
-        // 2. Conquistas de XP (Lenda do XP) - 50 Insígnias
-        // Rebalanceamento: saltos de 1000 em 1000 XP
         for (let i = 1; i <= 50; i++) {
             const xpRequisito = i * 1000;
             conquistas.push({
@@ -944,7 +1021,6 @@
             });
         }
 
-        // 3. Desafios Especiais e Conquistas Complexas - 15 Insígnias de Elite
         conquistas.push({
             id: "safe-coder",
             nome: "Escudo do Git",
@@ -1072,26 +1148,22 @@
         const concluídas = lista.filter(m => m.status === "Concluída").length;
         const stats = obterEstatisticasUsuario();
 
-        // Carrega dados editados do LocalStorage
         const perfilSalvo = JSON.parse(localStorage.getItem(`devquest_profile_${currentUser}`)) || {};
         
-        // Renderização dos 4 campos principais do perfil na tela
         document.getElementById('profile-display-name').innerText = perfilSalvo.fullname || currentUser;
         document.getElementById('profile-display-age').innerText = perfilSalvo.age || "Não informada";
         document.getElementById('profile-display-email').innerText = perfilSalvo.email || "Não informado";
         document.getElementById('profile-display-course').innerText = perfilSalvo.course || "Recruta em Treinamento";
 
-        // Cálculo de Nível (200 XP por nível)
         const nivelAtual = Math.floor(totalXP / 200) + 1;
         const xpNoNivelAtual = totalXP % 200;
-        const porcentagemXP = (xpNoNivelAtual / 200) * 100; // Porcentagem real da barra
+        const porcentagemXP = (xpNoNivelAtual / 200) * 100; 
 
         document.getElementById('profile-level').innerText = `Nível ${nivelAtual}`;
         document.getElementById('profile-xp-text').innerText = `${xpNoNivelAtual} / 200 XP`;
         document.getElementById('profile-total-xp-text').innerText = `Total: ${totalXP} XP`;
         document.getElementById('xp-bar').style.width = `${porcentagemXP}%`;
 
-        // Renderizar Galeria de Conquistas (+100)
         const bancoConquistas = gerarBancoDeConquistas(concluídas, totalXP, stats);
         const achievementsList = document.getElementById('achievements-list');
         achievementsList.innerHTML = "";
