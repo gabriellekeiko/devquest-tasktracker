@@ -51,6 +51,6 @@ Fique à vontade para se conectar comigo, explorar meus outros projetos de dados
 *  **LinkedIn:** [Acesse meu perfil profissional](https://www.linkedin.com/in/gabrielle-keiko-9baa6a2b3/)
 *  **E-mail Pessoal:** [gkeiko.05@gmail.com](mailto:gkeiko.05@gmail.com)
 *  **E-mail Institucional:** [gkeiko.05@gmail.com](mailto:gabrielle.keiko@sempreceub.com)
-*  **Meu Portal Principal:** (https://gabriellekeiko.github.io/devquest-tasktracker/)
+*  **Meu Portal Principal:** https://gabriellekeiko.github.io/devquest-tasktracker/
 
 ---
