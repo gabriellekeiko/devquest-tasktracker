@@ -16,6 +16,7 @@
             --low-priority: #3a86ff;
             --medium-priority: #ffbe0b;
             --high-priority: #ff006e;
+            --failed-color: #7209b7;
         }
 
         body {
@@ -32,7 +33,7 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background: var(--card-bg);
             border-radius: 12px;
             border: 2px solid var(--neon-purple);
@@ -41,7 +42,7 @@
             display: none; /* Controlado via JS */
         }
 
-        /* Tela de Autenticação (Login/Cadastro) */
+        /* Tela de Autenticação */
         .auth-container {
             width: 100%;
             max-width: 400px;
@@ -88,7 +89,7 @@
             text-transform: uppercase;
         }
 
-        input[type="text"], input[type="password"], select {
+        input[type="text"], input[type="password"], input[type="datetime-local"], select {
             width: 100%;
             box-sizing: border-box;
             background: #1c2030;
@@ -101,9 +102,46 @@
             transition: 0.3s;
         }
 
-        input[type="text"]:focus, input[type="password"]:focus, select:focus {
+        input[type="text"]:focus, input[type="password"]:focus, input[type="datetime-local"]:focus, select:focus {
             border-color: var(--neon-cyan);
             box-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
+        }
+
+        /* Navegação por Abas */
+        .navigation-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #252b41;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #8b8f9e;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 6px 6px 0 0;
+            transition: 0.3s;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .tab-btn.active {
+            color: var(--neon-cyan);
+            border-bottom: 3px solid var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         /* Botões */
@@ -150,64 +188,121 @@
             margin-bottom: 20px;
         }
 
-        .user-welcome {
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        .btn-logout {
-            background: rgba(255, 0, 110, 0.1);
-            color: var(--high-priority);
-            border: 1px solid var(--high-priority);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.85rem;
-        }
-
-        .btn-logout:hover {
-            background: var(--high-priority);
-            color: #fff;
-        }
-
-        /* Dashboard de XP */
-        .dashboard {
-            background: rgba(0, 0, 0, 0.4);
+        /* Perfil do Usuário e Barra de XP */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid rgba(157, 78, 221, 0.3);
-            margin-bottom: 30px;
+            padding: 25px;
+            border: 1px solid rgba(157, 78, 221, 0.2);
         }
 
-        .xp-display {
-            font-size: 2.5rem;
+        .level-badge {
+            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--neon-purple);
-            text-shadow: 0 0 15px rgba(157, 78, 221, 0.6);
-            margin: 10px 0;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
         }
 
-        /* Form Cadastro de Tarefas */
+        .xp-bar-container {
+            background: #1c2030;
+            border-radius: 20px;
+            height: 20px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #32384e;
+        }
+
+        .xp-bar-fill {
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* Grid de Conquistas */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .achievements-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .achievements-grid::-webkit-scrollbar-thumb {
+            background-color: var(--neon-purple);
+            border-radius: 4px;
+        }
+
+        .achievement-card {
+            background: #1c2030;
+            border: 1px solid #252b41;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Conquista Bloqueada (Cinza) */
+        .achievement-card.locked {
+            filter: grayscale(1);
+            opacity: 0.35;
+        }
+
+        /* Conquista Desbloqueada (Colorida e Brilhante) */
+        .achievement-card.unlocked {
+            filter: none;
+            opacity: 1;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
+            background: rgba(0, 245, 212, 0.05);
+        }
+
+        .achievement-icon {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .achievement-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* Cadastro de Tarefas com Prazo */
         .form-group {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 25px;
-            flex-wrap: wrap;
         }
 
-        .form-group input[type="text"] {
-            flex: 2;
-            min-width: 200px;
+        .form-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
         }
 
-        .form-group select {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        /* Lista de Missões */
+        /* Itens de Missão */
         .quest-list {
             list-style: none;
             padding: 0;
@@ -235,6 +330,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            flex: 1;
         }
 
         .quest-title {
@@ -247,6 +343,7 @@
             gap: 10px;
             font-size: 0.8rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .badge-priority {
@@ -263,6 +360,11 @@
         .badge-xp {
             color: var(--neon-cyan);
             font-weight: 600;
+        }
+
+        .quest-deadline {
+            color: #ffbe0b;
+            font-size: 0.8rem;
         }
 
         .btn-complete {
@@ -282,6 +384,7 @@
             box-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
         }
 
+        /* Status Concluída e Falhada */
         .quest-completed {
             opacity: 0.5;
             background: rgba(0, 0, 0, 0.3);
@@ -293,9 +396,29 @@
             color: #8b8f9e;
         }
 
-        .badge-status {
+        .quest-failed {
+            border-color: rgba(255, 0, 110, 0.3);
+            background: rgba(255, 0, 110, 0.03);
+        }
+
+        .quest-failed .quest-title {
+            color: #ff006e;
+            text-decoration: line-through;
+        }
+
+        .badge-status-completed {
             background: rgba(0, 245, 212, 0.15);
             color: var(--neon-cyan);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .badge-status-failed {
+            background: rgba(255, 0, 110, 0.15);
+            color: var(--high-priority);
             padding: 3px 8px;
             border-radius: 4px;
             font-weight: bold;
@@ -327,43 +450,81 @@
     <button class="btn btn-secondary" id="btn-switch-auth" onclick="alternarModoAuth()">Criar Nova Conta</button>
 </div>
 
-<!-- PAINEL DO USUÁRIO (DASHBOARD PRINCIPAL) -->
+<!-- PAINEL DO JOGADOR -->
 <div class="container" id="main-panel">
     <div class="header-dashboard">
-        <div class="user-welcome">Player: <span id="display-username" style="color: var(--neon-cyan);">Gabrielle</span></div>
-        <button class="btn-logout" onclick="fazerLogout()">Sair da Conta</button>
+        <div class="user-welcome">Player: <span id="display-username" style="color: var(--neon-cyan);">Player</span></div>
+        <button class="btn-logout" style="background: rgba(255, 0, 110, 0.1); color: var(--neon-pink); border: 1px solid var(--neon-pink); padding: 6px 12px; border-radius: 4px; cursor: pointer;" onclick="fazerLogout()">Sair da Conta</button>
     </div>
 
-    <!-- Painel de XP -->
-    <div class="dashboard">
-        <div>NÍVEL DE EXPERIÊNCIA ATUAL</div>
-        <div class="xp-display" id="xp-total">0 XP</div>
-        <div style="font-size: 0.85rem; color: #8b8f9e;">Complete missões para evoluir o seu painel!</div>
+    <!-- Abas de Navegação -->
+    <div class="navigation-tabs">
+        <button class="tab-btn active" id="tab-quests" onclick="mudarAba('quests')">⚔️ Missões</button>
+        <button class="tab-btn" id="tab-profile" onclick="mudarAba('profile')">👤 Perfil & Conquistas</button>
     </div>
 
-    <!-- Cadastro de Tarefas (Entradas da Fase 1) -->
-    <div class="form-group">
-        <input type="text" id="quest-title" placeholder="Digite o título da sua missão (Ex: Refatorar Código)...">
-        <select id="quest-priority">
-            <option value="">Selecionar Prioridade</option>
-            <option value="Baixa">Baixa (10 XP)</option>
-            <option value="Média">Média (25 XP)</option>
-            <option value="Alta">Alta (50 XP)</option>
-        </select>
-        <button class="btn btn-add" style="width: auto; margin: 0;" onclick="cadastrarMissao()">Iniciar Quest</button>
+    <!-- ABA 1: MISSÕES -->
+    <div class="tab-content active" id="content-quests">
+        <!-- Cadastro de Tarefas com Deadline -->
+        <div class="form-group">
+            <input type="text" id="quest-title" placeholder="Digite o título da sua missão (Ex: Refatorar Código)...">
+            <div class="form-row">
+                <select id="quest-priority" style="flex: 1;">
+                    <option value="">Selecionar Prioridade</option>
+                    <option value="Baixa">Baixa (10 XP)</option>
+                    <option value="Média">Média (25 XP)</option>
+                    <option value="Alta">Alta (50 XP)</option>
+                </select>
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <input type="datetime-local" id="quest-deadline">
+                </div>
+            </div>
+            <button class="btn btn-add" style="margin: 0;" onclick="cadastrarMissao()">Iniciar Quest</button>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin-bottom: 15px;">Suas Quests Ativas</h3>
+        <ul class="quest-list" id="quest-list">
+            <!-- Inseridas dinamicamente via JS -->
+        </ul>
     </div>
 
-    <!-- Lista de Saídas da Fase 1 -->
-    <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin-bottom: 15px;">Suas Quests Ativas</h3>
-    <ul class="quest-list" id="quest-list">
-        <!-- Inseridas dinamicamente via JS com isolamento por conta -->
-    </ul>
+    <!-- ABA 2: PERFIL & CONQUISTAS -->
+    <div class="tab-content" id="content-profile">
+        <div class="profile-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 id="profile-name" style="margin: 0; color: var(--neon-cyan);">Gabrielle Keiko</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #8b8f9e;">Ciência de Dados & Machine Learning | UniCEUB</p>
+                </div>
+                <div class="level-badge" id="profile-level">Nível 1</div>
+            </div>
+
+            <!-- Barra de XP (Regra: Sobe a cada 200 XP) -->
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                    <span>Experiência (XP): <strong id="profile-xp-text" style="color: var(--neon-cyan);">0 / 200 XP</strong></span>
+                    <span id="profile-total-xp-text" style="color: var(--neon-purple);">Total: 0 XP</span>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-fill" id="xp-bar"></div>
+                </div>
+            </div>
+
+            <!-- Galeria de Conquistas (+100) -->
+            <h3 style="border-bottom: 1px solid #252b41; padding-bottom: 10px; margin: 25px 0 0 0; color: var(--neon-cyan); font-size: 1.1rem; text-transform: uppercase;">
+                🏆 Conquistas Desbloqueadas (<span id="achievements-count">0/105</span>)
+            </h3>
+            <div class="achievements-grid" id="achievements-list">
+                <!-- Geradas dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     // Controle de Sessão e Estado do Sistema
     let currentUser = null;
-    let modoCadastro = false; // Alterna entre Login e Registro
+    let modoCadastro = false; 
 
     // Inicialização da aplicação
     window.onload = function() {
@@ -372,9 +533,30 @@
             currentUser = userSalvo;
             carregarDashboardUsuario();
         }
+        
+        // Rodar validador de deadlines a cada 10 segundos
+        setInterval(verificarDeadlinesExpiradas, 10000);
     };
 
-    // Alternar entre tela de Login e tela de Cadastro
+    // Alternar entre abas
+    function mudarAba(aba) {
+        document.getElementById('tab-quests').classList.remove('active');
+        document.getElementById('tab-profile').classList.remove('active');
+        document.getElementById('content-quests').classList.remove('active');
+        document.getElementById('content-profile').classList.remove('active');
+
+        if (aba === 'quests') {
+            document.getElementById('tab-quests').classList.add('active');
+            document.getElementById('content-quests').classList.add('active');
+            renderizarMissoes();
+        } else {
+            document.getElementById('tab-profile').classList.add('active');
+            document.getElementById('content-profile').classList.add('active');
+            renderizarPerfil();
+        }
+    }
+
+    // Alternar entre Login e Cadastro
     function alternarModoAuth() {
         modoCadastro = !modoCadastro;
         const authTitle = document.getElementById('auth-title');
@@ -392,7 +574,7 @@
         }
     }
 
-    // Processamento de Login ou Registro de Usuário
+    // Login ou Registro de Usuário
     function processarAutenticacao() {
         const usernameInput = document.getElementById('username').value.trim();
         const passwordInput = document.getElementById('password').value.trim();
@@ -402,24 +584,20 @@
             return;
         }
 
-        // Carrega a base de usuários registrados no LocalStorage
         let usuariosRegistrados = JSON.parse(localStorage.getItem('devquest_registered_users')) || [];
 
         if (modoCadastro) {
-            // Fluxo de Cadastro de Usuário
             const usuarioExiste = usuariosRegistrados.some(u => u.username.toLowerCase() === usernameInput.toLowerCase());
             if (usuarioExiste) {
-                alert("Erro: Este nome de usuário já está sendo usado por outro player.");
+                alert("Erro: Este nome de usuário já está sendo usado.");
                 return;
             }
 
-            // Registra novo usuário
             usuariosRegistrados.push({ username: usernameInput, password: passwordInput });
             localStorage.setItem('devquest_registered_users', JSON.stringify(usuariosRegistrados));
-            alert("Sucesso! Conta criada com êxito. Faça o seu login agora!");
+            alert("Sucesso! Conta criada com êxito. Faça o seu login!");
             alternarModoAuth();
         } else {
-            // Fluxo de Login
             const usuarioValido = usuariosRegistrados.find(u => u.username.toLowerCase() === usernameInput.toLowerCase() && u.password === passwordInput);
             
             if (usuarioValido) {
@@ -432,20 +610,19 @@
         }
     }
 
-    // Carregar os dados exclusivos do usuário logado
     function carregarDashboardUsuario() {
         document.getElementById('auth-panel').style.display = 'none';
         document.getElementById('main-panel').style.display = 'block';
         document.getElementById('display-username').innerText = currentUser;
+        document.getElementById('profile-name').innerText = currentUser;
 
-        // Limpa os inputs da tela de login
         document.getElementById('username').value = "";
         document.getElementById('password').value = "";
 
+        verificarDeadlinesExpiradas();
         renderizarMissoes();
     }
 
-    // Realizar Logout e fechar sessão
     function fazerLogout() {
         sessionStorage.removeItem('devquest_session_user');
         currentUser = null;
@@ -453,23 +630,23 @@
         document.getElementById('auth-panel').style.display = 'block';
     }
 
-    // Buscar as tarefas exclusivas do usuário logado
     function obterMissoesDoUsuario() {
         return JSON.parse(localStorage.getItem(`devquest_missoes_${currentUser}`)) || [];
     }
 
-    // Buscar o XP exclusivo do usuário logado
     function obterXpDoUsuario() {
         return parseInt(localStorage.getItem(`devquest_xp_${currentUser}`)) || 0;
     }
 
-    // Cadastrar Missão isolada por conta (Regras 1 e 2)
+    // Algoritmo de Cadastro de Missões com Deadline
     function cadastrarMissao() {
         const tituloInput = document.getElementById('quest-title');
         const prioridadeSelect = document.getElementById('quest-priority');
+        const deadlineInput = document.getElementById('quest-deadline');
 
         const titulo = tituloInput.value.trim();
         const prioridade = prioridadeSelect.value;
+        const deadlineValue = deadlineInput.value;
 
         if (titulo === "") {
             alert("Erro: O título da missão é obrigatório.");
@@ -481,7 +658,17 @@
             return;
         }
 
-        // Regra de XP automático (Regra 3)
+        if (deadlineValue === "") {
+            alert("Erro: É obrigatório definir uma data limite para a missão.");
+            return;
+        }
+
+        const dataDeadline = new Date(deadlineValue);
+        if (dataDeadline <= new Date()) {
+            alert("Erro: O prazo limite da missão deve ser uma data futura!");
+            return;
+        }
+
         let xpCalculado = 0;
         if (prioridade === "Baixa") xpCalculado = 10;
         else if (prioridade === "Média") xpCalculado = 25;
@@ -491,7 +678,8 @@
             titulo: titulo,
             prioridade: prioridade,
             xp: xpCalculado,
-            status: "Pendente"
+            status: "Pendente",
+            deadline: deadlineValue
         };
 
         let lista = obterMissoesDoUsuario();
@@ -501,11 +689,12 @@
 
         tituloInput.value = "";
         prioridadeSelect.value = "";
+        deadlineInput.value = "";
 
         renderizarMissoes();
     }
 
-    // Concluir Missão (Regra 4)
+    // Concluir Quest e Soma de XP
     function concluirMissao(index) {
         let lista = obterMissoesDoUsuario();
         let xpAcumulado = obterXpDoUsuario();
@@ -522,7 +711,40 @@
         }
     }
 
-    // Renderizar dados na tela de forma isolada
+    // Verificador de Deadlines Expiradas (Punição se falhar)
+    function verificarDeadlinesExpiradas() {
+        if (!currentUser) return;
+
+        let lista = obterMissoesDoUsuario();
+        let xpAcumulado = obterXpDoUsuario();
+        let alterado = false;
+
+        const agora = new Date();
+
+        lista.forEach(missao => {
+            if (missao.status === "Pendente" && missao.deadline) {
+                const prazo = new Date(missao.deadline);
+                if (agora > prazo) {
+                    missao.status = "Falhada";
+                    
+                    // Perda do XP correspondente se falhar
+                    xpAcumulado -= missao.xp;
+                    if (xpAcumulado < 0) xpAcumulado = 0; 
+                    
+                    alterado = true;
+                    alert(`⚠️ Missão Falhada! Você estourou o prazo limite de "${missao.titulo}" e perdeu ${missao.xp} XP!`);
+                }
+            }
+        });
+
+        if (alterado) {
+            localStorage.setItem(`devquest_missoes_${currentUser}`, JSON.stringify(lista));
+            localStorage.setItem(`devquest_xp_${currentUser}`, xpAcumulado);
+            renderizarMissoes();
+        }
+    }
+
+    // Renderização da Lista de Missões
     function renderizarMissoes() {
         const listContainer = document.getElementById('quest-list');
         listContainer.innerHTML = "";
@@ -531,32 +753,164 @@
         const xpAcumulado = obterXpDoUsuario();
 
         if (lista.length === 0) {
-            listContainer.innerHTML = `<li style="text-align: center; color: #8b8f9e; padding: 20px;">Você não tem missões cadastradas no seu painel. Comece a sua jornada técnica agora!</li>`;
+            listContainer.innerHTML = `<li style="text-align: center; color: #8b8f9e; padding: 20px;">Você não tem missões cadastradas no momento. Comece adicionando uma!</li>`;
             document.getElementById('xp-total').innerText = `${xpAcumulado} XP`;
             return;
         }
 
         lista.forEach((missao, index) => {
             const isCompleted = missao.status === "Concluída";
+            const isFailed = missao.status === "Falhada";
             const li = document.createElement('li');
-            li.className = `quest-item ${isCompleted ? 'quest-completed' : ''}`;
+            li.className = `quest-item ${isCompleted ? 'quest-completed' : ''} ${isFailed ? 'quest-failed' : ''}`;
+
+            const formatadorData = new Date(missao.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
             li.innerHTML = `
                 <div class="quest-info">
                     <span class="quest-title">${missao.titulo}</span>
                     <div class="quest-meta">
                         <span class="badge-priority priority-${missao.prioridade.toLowerCase()}">${missao.prioridade}</span>
-                        <span class="badge-xp">+${missao.xp} XP</span>
-                        ${isCompleted ? '<span class="badge-status">Concluída</span>' : ''}
+                        <span class="badge-xp">${isFailed ? '-' : '+'}${missao.xp} XP</span>
+                        <span class="quest-deadline">⏱️ Limite: ${formatadorData}</span>
+                        ${isCompleted ? '<span class="badge-status-completed">Concluída</span>' : ''}
+                        ${isFailed ? '<span class="badge-status-failed">Falhada (Expirada)</span>' : ''}
                     </div>
                 </div>
-                ${!isCompleted ? `<button class="btn-complete" onclick="concluirMissao(${index})">Concluir</button>` : '<span></span>'}
+                ${(!isCompleted && !isFailed) ? `<button class="btn-complete" onclick="concluirMissao(${index})">Concluir</button>` : '<span></span>'}
             `;
 
             listContainer.appendChild(li);
         });
 
         document.getElementById('xp-total').innerText = `${xpAcumulado} XP`;
+    }
+
+    // GERADOR DINÂMICO DE +100 CONQUISTAS
+    function gerarBancoDeConquistas(missoesConcluidas, totalXP) {
+        let conquistas = [];
+
+        // 1. Conquistas de Missões (Complecionista) - 50 Níveis
+        for (let i = 1; i <= 50; i++) {
+            conquistas.push({
+                id: `quest-${i}`,
+                nome: `Desbravador ${conversorRomano(i)}`,
+                descricao: `Conclua ${i} missão(ões) de forma bem-sucedida.`,
+                icone: i % 2 === 0 ? "🛡️" : "⚔️",
+                desbloqueado: missoesConcluidas >= i
+            });
+        }
+
+        // 2. Conquistas de XP acumulado (Lenda do XP) - 50 Níveis (escala de 50 XP)
+        for (let i = 1; i <= 50; i++) {
+            const xpRequisito = i * 50;
+            conquistas.push({
+                id: `xp-${i}`,
+                nome: `Lenda do XP ${conversorRomano(i)}`,
+                descricao: `Acumule um total de ${xpRequisito} pontos de experiência.`,
+                icone: i % 2 === 0 ? "🔮" : "🧪",
+                desbloqueado: totalXP >= xpRequisito
+            });
+        }
+
+        // 3. Conquistas Extras/Secretas (5 Conquistas)
+        conquistas.push({
+            id: "lvl-5",
+            nome: "Soberana dos Dados",
+            descricao: "Alcance o Nível 5 de Experiência.",
+            icone: "👑",
+            desbloqueado: Math.floor(totalXP / 200) + 1 >= 5 // ATUALIZADO: nível calculado de 200 em 200 XP
+        });
+        conquistas.push({
+            id: "alta-prioridade",
+            nome: "Arquiteta de Soluções",
+            descricao: "Tenha pelo menos uma tarefa de Prioridade Alta concluída.",
+            icone: "🧠",
+            desbloqueado: verificarQuestAltaConcluida()
+        });
+        conquistas.push({
+            id: "safe-coder",
+            nome: "Escudo do Git",
+            descricao: "Configure sua conta e mantenha segurança máxima.",
+            icone: "💾",
+            desbloqueado: true
+        });
+        conquistas.push({
+            id: "first-step",
+            nome: "Primeiro Passo",
+            descricao: "Conclua a sua primeira missão ativa no DevQuest.",
+            icone: "⚡",
+            desbloqueado: missoesConcluidas >= 1
+        });
+        conquistas.push({
+            id: "speedrunner",
+            nome: "Velocista Dev",
+            descricao: "Acumule mais de 500 XP totais.",
+            icone: "🚀",
+            desbloqueado: totalXP >= 500
+        });
+
+        return conquistas;
+    }
+
+    function verificarQuestAltaConcluida() {
+        const lista = obterMissoesDoUsuario();
+        return lista.some(m => m.prioridade === "Alta" && m.status === "Concluída");
+    }
+
+    function conversorRomano(num) {
+        const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+        let roman = '';
+        for (let i in lookup) {
+            while (num >= lookup[i]) {
+                roman += i;
+                num -= lookup[i];
+            }
+        }
+        return roman;
+    }
+
+    // Renderização do Perfil e das Conquistas
+    function renderizarPerfil() {
+        const totalXP = obterXpDoUsuario();
+        const lista = obterMissoesDoUsuario();
+        const concluídas = lista.filter(m => m.status === "Concluída").length;
+
+        // Cálculo de Nível (ATUALIZADO: 200 XP por nível)
+        const nivelAtual = Math.floor(totalXP / 200) + 1;
+        const xpNoNivelAtual = totalXP % 200;
+        const porcentagemXP = (xpNoNivelAtual / 200) * 100; // Porcentagem real da barra
+
+        // Atualizar textos e dados do perfil
+        document.getElementById('profile-level').innerText = `Nível ${nivelAtual}`;
+        document.getElementById('profile-xp-text').innerText = `${xpNoNivelAtual} / 200 XP`; // ATUALIZADO
+        document.getElementById('profile-total-xp-text').innerText = `Total: ${totalXP} XP`;
+        document.getElementById('xp-bar').style.width = `${porcentagemXP}%`;
+
+        // Renderizar Galeria de Conquistas (+100)
+        const bancoConquistas = gerarBancoDeConquistas(concluídas, totalXP);
+        const achievementsList = document.getElementById('achievements-list');
+        achievementsList.innerHTML = "";
+
+        let desbloqueadasContador = 0;
+
+        bancoConquistas.forEach(conq => {
+            const card = document.createElement('div');
+            card.className = `achievement-card ${conq.desbloqueado ? 'unlocked' : 'locked'}`;
+            card.title = conq.descricao;
+
+            if (conq.desbloqueado) desbloqueadasContador++;
+
+            card.innerHTML = `
+                <div class="achievement-icon">${conq.icone}</div>
+                <div class="achievement-name">${conq.nome}</div>
+                <div style="font-size: 0.6rem; color: #8b8f9e;">${conq.desbloqueado ? 'Desbloqueada!' : 'Bloqueada'}</div>
+            `;
+
+            achievementsList.appendChild(card);
+        });
+
+        document.getElementById('achievements-count').innerText = `${desbloqueadasContador} / ${bancoConquistas.length}`;
     }
 </script>
 
